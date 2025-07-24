@@ -187,6 +187,54 @@ rfetch
 rfetch
 ```
 
+### How to run rFetch
+
+#### After downloading pre-built binaries
+
+```bash
+# macOS/Linux - Make executable and run
+chmod +x rfetch-macos-linux
+./rfetch-macos-linux
+
+# Windows - Run directly
+rfetch-windows.exe
+
+# Or rename and add to PATH
+mv rfetch-windows.exe rfetch.exe
+# Add directory to Windows PATH, then:
+rfetch
+```
+
+#### After building from source
+
+```bash
+# Run directly from target directory
+./target/release/rfetch
+
+# Or install system-wide
+sudo cp target/release/rfetch /usr/local/bin/
+rfetch
+
+# Windows (after cross-compilation)
+./target/x86_64-pc-windows-gnu/release/rfetch.exe
+```
+
+#### Platform-specific execution
+
+```bash
+# Linux/macOS - Standard execution
+rfetch
+
+# Termux (Android)
+rfetch
+
+# Windows Command Prompt
+rfetch.exe
+
+# Windows PowerShell
+.\rfetch.exe
+```
+
 ### Available options
 
 ```bash
