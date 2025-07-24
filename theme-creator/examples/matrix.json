@@ -1,0 +1,149 @@
+{
+  "meta": {
+    "name": "matrix",
+    "description": "Matrix-inspired green theme with digital rain effects",
+    "version": "1.0.0",
+    "author": "rFetch Community",
+    "license": "MIT",
+    "created": "2024-01-15"
+  },
+  "colors": {
+    "title": {
+      "base": "bright_green",
+      "rgb": [0, 255, 0],
+      "hex": "#00ff00",
+      "effects": ["bold", "glow"],
+      "animation": {
+        "animation_type": "typewriter",
+        "duration": 2.0,
+        "repeat": false,
+        "easing": "ease-out"
+      }
+    },
+    "subtitle": {
+      "base": "green",
+      "rgb": [0, 200, 0],
+      "hex": "#00c800",
+      "effects": ["glow"],
+      "animation": null
+    },
+    "key": {
+      "base": "bright_green",
+      "rgb": [0, 255, 0],
+      "hex": "#00ff00",
+      "effects": ["bold"],
+      "animation": null
+    },
+    "value": {
+      "base": "green",
+      "rgb": [0, 200, 0],
+      "hex": "#00c800",
+      "effects": [],
+      "animation": null
+    },
+    "separator": {
+      "base": "bright_green",
+      "rgb": [0, 255, 0],
+      "hex": "#00ff00",
+      "effects": ["glow"],
+      "animation": null
+    },
+    "logo": {
+      "base": "bright_green",
+      "rgb": [0, 255, 0],
+      "hex": "#00ff00",
+      "effects": ["glow", "bold"],
+      "animation": {
+        "animation_type": "fade",
+        "duration": 1.0,
+        "repeat": true,
+        "easing": "ease-in-out"
+      }
+    },
+    "accent": {
+      "base": "bright_white",
+      "rgb": [255, 255, 255],
+      "hex": "#ffffff",
+      "effects": [],
+      "animation": null
+    }
+  },
+  "display": {
+    "logo_type": "ascii",
+    "separator": " :: ",
+    "padding": 2,
+    "show_borders": true,
+    "show_color_bar": true,
+    "color_bar_style": "matrix_rain",
+    "alignment": "left",
+    "max_width": null,
+    "line_spacing": 1.1,
+    "indent": 1,
+    "show_icons": false,
+    "icon_style": "matrix"
+  },
+  "layout": {
+    "info_order": [
+      "os",
+      "kernel",
+      "uptime",
+      "packages",
+      "shell",
+      "terminal",
+      "cpu",
+      "gpu",
+      "memory",
+      "disk",
+      "battery",
+      "date"
+    ],
+    "custom_labels": {
+      "os": "SYSTEM",
+      "kernel": "KERNEL",
+      "uptime": "RUNTIME",
+      "packages": "MODULES",
+      "shell": "INTERFACE",
+      "terminal": "CONSOLE",
+      "cpu": "PROCESSOR",
+      "gpu": "GRAPHICS",
+      "memory": "MEMORY",
+      "disk": "STORAGE",
+      "battery": "POWER",
+      "date": "TIMESTAMP"
+    }
+  },
+  "effects": {
+    "transitions": true,
+    "shadows": false,
+    "glow_intensity": 0.7,
+    "particle_effects": true,
+    "sound_effects": false,
+    "terminal_title": "MATRIX SYSTEM INTERFACE"
+  },
+  "ascii": {
+    "logo": [
+      "    ███╗   ███╗ █████╗ ████████╗██████╗ ██╗██╗  ██╗",
+      "    ████╗ ████║██╔══██╗╚══██╔══╝██╔══██╗██║╚██╗██╔╝",
+      "    ██╔████╔██║███████║   ██║   ██████╔╝██║ ╚███╔╝ ",
+      "    ██║╚██╔╝██║██╔══██║   ██║   ██╔══██╗██║ ██╔██╗ ",
+      "    ██║ ╚═╝ ██║██║  ██║   ██║   ██║  ██║██║██╔╝ ██╗",
+      "    ╚═╝     ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝╚═╝  ╚═╝",
+      "",
+      "    ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░",
+      "    ░ WELCOME TO THE MATRIX - SYSTEM INTERFACE ░",
+      "    ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░"
+    ],
+    "small_logo": [
+      "⚡"
+    ],
+    "decorations": {
+      "border_top": "████████████████████████████████████████",
+      "border_bottom": "████████████████████████████████████████",
+      "corner_tl": "█",
+      "corner_tr": "█",
+      "corner_bl": "█",
+      "corner_br": "█",
+      "vertical": "█"
+    }
+  }
+}

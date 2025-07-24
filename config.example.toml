@@ -1,0 +1,117 @@
+# Configurazione di esempio per rFetch
+
+[display]
+# Tipo di logo: "auto", "ascii", "small", "none"
+logo_type = "auto"
+
+# Modalità colore: "auto", "always", "never"
+color_mode = "auto"
+
+# Formato output: "normal", "json"
+output_format = "normal"
+
+# Modalità minimale
+minimal = false
+
+# Modalità verbosa
+verbose = false
+
+# Separatore tra chiave e valore
+separator = ": "
+
+# Padding tra logo e informazioni
+padding = 2
+
+[info]
+# Sistema operativo
+show_os = true
+
+# Kernel
+show_kernel = true
+
+# Uptime
+show_uptime = true
+
+# Numero di pacchetti installati
+show_packages = true
+
+# Shell in uso
+show_shell = true
+
+# Risoluzione schermo
+show_resolution = true
+
+# Desktop Environment
+show_de = true
+
+# Window Manager
+show_wm = true
+
+# Tema del desktop
+show_theme = false
+
+# Icone del desktop
+show_icons = false
+
+# Font del sistema
+show_font = false
+
+# Cursore del mouse
+show_cursor = false
+
+# Terminale in uso
+show_terminal = true
+
+# Informazioni CPU
+show_cpu = true
+
+# Informazioni GPU
+show_gpu = true
+
+# Informazioni memoria RAM
+show_memory = true
+
+# Informazioni disco/SSD
+show_disk = true
+
+# Informazioni batteria
+show_battery = true
+
+# Locale del sistema
+show_locale = false
+
+# IP locale
+show_local_ip = false
+
+# IP pubblico
+show_public_ip = false
+
+# Utenti del sistema
+show_users = false
+
+# Data e ora
+show_date = true
+
+[colors]
+# Colore del titolo (nome@hostname)
+title = "cyan"
+
+# Colore del sottotitolo
+subtitle = "blue"
+
+# Colore delle chiavi (OS, CPU, etc.)
+key = "yellow"
+
+# Colore dei valori
+value = "white"
+
+# Colore del separatore
+separator = "white"
+
+# Colore del logo
+logo = "cyan"
+
+# Colori disponibili:
+# black, red, green, yellow, blue, magenta, cyan, white
+# bright_black, bright_red, bright_green, bright_yellow,
+# bright_blue, bright_magenta, bright_cyan, bright_white

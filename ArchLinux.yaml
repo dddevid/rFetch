@@ -1,0 +1,127 @@
+meta:
+  name: "Arch Linux"
+  description: "Il mio tema personalizzato"
+  version: "1.0.0"
+  author: "devid"
+  license: "MIT"
+  created: "2025-07-24"
+colors:
+  title:
+    base: "cyan"
+    rgb:
+      - 0
+      - 255
+      - 255
+    hex: "#00ffff"
+    effects:
+      - "bold"
+    animation: null
+  subtitle:
+    base: "blue"
+    rgb:
+      - 0
+      - 0
+      - 255
+    hex: "#0000ff"
+    effects: null
+    animation: null
+  key:
+    base: "yellow"
+    rgb:
+      - 255
+      - 255
+      - 0
+    hex: "#ffff00"
+    effects:
+      - "bold"
+    animation: null
+  value:
+    base: "white"
+    rgb:
+      - 255
+      - 255
+      - 255
+    hex: "#ffffff"
+    effects: null
+    animation: null
+  separator:
+    base: "white"
+    rgb:
+      - 255
+      - 255
+      - 255
+    hex: "#ffffff"
+    effects: null
+    animation: null
+  logo:
+    base: "cyan"
+    rgb:
+      - 0
+      - 255
+      - 255
+    hex: "#00ffff"
+    effects:
+      - "glow"
+    animation: null
+  accent:
+    base: "magenta"
+    rgb:
+      - 255
+      - 0
+      - 255
+    hex: "#ff00ff"
+    effects: null
+    animation: null
+display:
+  logo_type: "auto"
+  separator: ": "
+  padding: 2
+  show_borders: true
+  show_color_bar: true
+  color_bar_style: "blocks"
+  alignment: "center"
+  max_width: null
+  line_spacing: 1
+  indent: 0
+  show_icons: false
+  icon_style: "unicode"
+layout:
+  info_order:
+    - "os"
+    - "kernel"
+    - "uptime"
+    - "packages"
+    - "shell"
+    - "terminal"
+    - "cpu"
+    - "gpu"
+    - "memory"
+    - "disk"
+    - "battery"
+    - "date"
+  custom_labels: null
+effects:
+  transitions: true
+  shadows: false
+  glow_intensity: 0.1
+  particle_effects: true
+  sound_effects: false
+  terminal_title: null
+ascii:
+  logo:
+    - "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣸⣇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀"
+    - "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢰⣿⣿⡆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀"
+    - "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀"
+    - "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢿⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀"
+    - "⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣷⣤⣙⢻⣿⣿⣿⣿⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀"
+    - "⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡀⠀⠀⠀⠀⠀⠀⠀⠀"
+    - "⠀⠀⠀⠀⠀⠀⠀⢠⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⡄⠀⠀⠀⠀⠀⠀⠀"
+    - "⠀⠀⠀⠀⠀⠀⢠⣿⣿⣿⣿⣿⡿⠛⠛⠿⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀"
+    - "⠀⠀⠀⠀⠀⢠⣿⣿⣿⣿⣿⠏⠀⠀⠀⠀⠙⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀"
+    - "⠀⠀⠀⠀⣰⣿⣿⣿⣿⣿⣿⠀⠀⠀⠀⠀⠀⢿⣿⣿⣿⣿⠿⣆⠀⠀⠀⠀"
+    - "⠀⠀⠀⣴⣿⣿⣿⣿⣿⣿⣿⠀⠀⠀⠀⠀⠀⣿⣿⣿⣿⣿⣷⣦⡀⠀⠀⠀"
+    - "⠀⢀⣾⣿⣿⠿⠟⠛⠋⠉⠉⠀⠀⠀⠀⠀⠀⠉⠉⠙⠛⠻⠿⣿⣿⣷⡀⠀"
+    - "⣠⠟⠋⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⠻⣄"
+  small_logo:
+    - "A"
+  decorations: null
