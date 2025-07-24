@@ -91,10 +91,7 @@ cp target/release/rfetch /usr/local/bin/
 ### Arch Linux (and based distros)
 
 ```bash
-# Install from AUR (if available)
-yay -S rfetch
-
-# Or build from source
+# Build from source
 sudo pacman -S rust git
 git clone https://github.com/dddevid/rFetch.git
 cd rFetch
