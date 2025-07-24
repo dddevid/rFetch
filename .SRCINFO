@@ -1,0 +1,14 @@
+pkgbase = rfetch
+	pkgdesc = A fast, customizable system information tool written in Rust with full iOS support
+	pkgver = 0.1.1
+	pkgrel = 1
+	url = https://github.com/dddevid/rFetch
+	arch = x86_64
+	arch = aarch64
+	license = MIT
+	makedepends = rust
+	makedepends = cargo
+	source = rfetch-0.1.1.tar.gz::https://github.com/dddevid/rFetch/archive/v0.1.1.tar.gz
+	sha256sums = 2b9ee6309c4ae8629eb6ce007685659f5dc4daab846f20dfb1b97fe7e0a0d07a
+
+pkgname = rfetch

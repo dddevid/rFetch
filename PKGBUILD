@@ -1,6 +1,6 @@
 # Maintainer: dddevid <your-email@example.com>
 pkgname=rfetch
-pkgver=1.0.0
+pkgver=0.1.1
 pkgrel=1
 pkgdesc="A fast, customizable system information tool written in Rust with full iOS support"
 arch=('x86_64' 'aarch64')
@@ -9,7 +9,7 @@ license=('MIT')
 depends=()
 makedepends=('rust' 'cargo')
 source=("$pkgname-$pkgver.tar.gz::https://github.com/dddevid/rFetch/archive/v$pkgver.tar.gz")
-sha256sums=('SKIP')
+sha256sums=('2b9ee6309c4ae8629eb6ce007685659f5dc4daab846f20dfb1b97fe7e0a0d07a')
 
 build() {
     cd "$srcdir/rFetch-$pkgver"
@@ -35,8 +35,4 @@ package() {
     
     # Install example config
     install -Dm644 "config.example.toml" "$pkgdir/usr/share/doc/$pkgname/config.example.toml"
-    
-    # Install theme creator
-    install -dm755 "$pkgdir/usr/share/$pkgname/theme-creator"
-    cp -r theme-creator/* "$pkgdir/usr/share/$pkgname/theme-creator/"
 }
