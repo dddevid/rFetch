@@ -101,7 +101,6 @@ impl SystemInfo {
             colors: vec!["■".repeat(8)],
         };
 
-        // Gather information based on config
         if config.info.show_os {
             info.os = Self::get_os_info()?;
         }
@@ -170,7 +169,6 @@ impl SystemInfo {
             info.users = Self::get_logged_users();
         }
 
-        // Generate color bar
         info.colors = Self::generate_color_bar();
 
         Ok(info)
@@ -178,7 +176,6 @@ impl SystemInfo {
 
     #[cfg(target_os = "linux")]
     fn get_os_info() -> Result<String, RFetchError> {
-        // Check if running in Termux (Android)
         if Self::is_termux() {
             if let Ok(version) = env::var("TERMUX_VERSION") {
                 return Ok(format!("Termux {}", version));
@@ -186,9 +183,7 @@ impl SystemInfo {
             return Ok("Termux".to_string());
         }
 
-        // Check for Arch Linux specifically
         if let Ok(_) = fs::read_to_string("/etc/arch-release") {
-            // Try to get version from /etc/os-release
             if let Ok(content) = fs::read_to_string("/etc/os-release") {
                 for line in content.lines() {
                     if line.starts_with("PRETTY_NAME=") {
@@ -201,7 +196,6 @@ impl SystemInfo {
             return Ok("Arch Linux".to_string());
         }
 
-        // Check for Ubuntu specifically
         if let Ok(content) = fs::read_to_string("/etc/lsb-release") {
             let mut distrib_id = String::new();
             let mut distrib_release = String::new();
@@ -219,7 +213,6 @@ impl SystemInfo {
             }
         }
 
-        // Try /etc/os-release first
         if let Ok(content) = fs::read_to_string("/etc/os-release") {
             for line in content.lines() {
                 if line.starts_with("PRETTY_NAME=") {
@@ -230,7 +223,6 @@ impl SystemInfo {
             }
         }
 
-        // Fallback to /etc/issue
         if let Ok(content) = fs::read_to_string("/etc/issue") {
             let first_line = content.lines().next().unwrap_or("Linux");
             return Ok(first_line.replace("\\n", "").replace("\\l", "").trim().to_string());
@@ -254,18 +246,15 @@ impl SystemInfo {
 
     #[cfg(target_os = "ios")]
     fn get_os_info() -> Result<String, RFetchError> {
-        // iOS detection - check for iOS-specific environment
         if let Ok(version) = env::var("IPHONEOS_DEPLOYMENT_TARGET") {
             return Ok(format!("iOS {}", version));
         }
         
-        // Try to get iOS version from system
         if let Ok(output) = Command::new("sw_vers").arg("-productVersion").output() {
             let version = String::from_utf8_lossy(&output.stdout).trim().to_string();
             return Ok(format!("iOS {}", version));
         }
         
-        // Check if running in iSH (iOS shell)
         if let Ok(_) = fs::read_to_string("/proc/ish") {
             return Ok("iOS (iSH)".to_string());
         }
@@ -293,7 +282,6 @@ impl SystemInfo {
     fn get_kernel_info() -> Result<String, RFetchError> {
         #[cfg(target_os = "ios")]
         {
-            // iOS kernel detection
             if Self::is_ios() {
                 if let Ok(output) = Command::new("uname").arg("-r").output() {
                     let kernel = String::from_utf8_lossy(&output.stdout).trim().to_string();
@@ -345,13 +333,10 @@ impl SystemInfo {
     fn get_uptime() -> Result<String, RFetchError> {
         if let Ok(output) = Command::new("uptime").output() {
             let uptime_str = String::from_utf8_lossy(&output.stdout);
-            // Parse uptime output to extract just the uptime part
-            // Example: "19:08  up 7 days,  7:12, 2 users, load averages: 11.23 31.89 30.19"
             if let Some(up_index) = uptime_str.find("up ") {
                 let after_up = &uptime_str[up_index + 3..];
                 if let Some(comma_index) = after_up.find(',') {
                     let mut uptime_part = after_up[..comma_index].trim();
-                    // Check if there's another comma (for users part)
                     if let Some(remaining) = after_up.get(comma_index + 1..) {
                         if let Some(second_comma) = remaining.find(',') {
                             uptime_part = &after_up[..comma_index + 1 + second_comma];
@@ -359,7 +344,6 @@ impl SystemInfo {
                     }
                     return Ok(uptime_part.trim_end_matches(',').trim().to_string());
                 } else {
-                    // No comma found, take everything after "up "
                     let end_index = after_up.find(" user").unwrap_or(after_up.len());
                     return Ok(after_up[..end_index].trim().to_string());
                 }
@@ -372,9 +356,7 @@ impl SystemInfo {
 
     #[cfg(target_os = "ios")]
     fn get_uptime() -> Result<String, RFetchError> {
-        // iOS uptime detection
         if Self::is_ios() {
-            // Try uptime command first (available in iSH)
             if let Ok(output) = Command::new("uptime").output() {
                 let uptime_str = String::from_utf8_lossy(&output.stdout);
                 if let Some(up_index) = uptime_str.find("up ") {
@@ -385,7 +367,6 @@ impl SystemInfo {
                 }
             }
             
-            // Fallback: try to read from /proc/uptime if available (iSH)
             if let Ok(content) = fs::read_to_string("/proc/uptime") {
                 let uptime_seconds = content
                     .split_whitespace()
@@ -405,11 +386,15 @@ impl SystemInfo {
             .args(&["os", "get", "LastBootUpTime", "/value"])
             .output()
         {
-            // Parse Windows uptime - simplified
-            Ok("unknown".to_string())
-        } else {
-            Ok("unknown".to_string())
+            let output_str = String::from_utf8_lossy(&output.stdout);
+            for line in output_str.lines() {
+                if line.starts_with("LastBootUpTime=") {
+                    let boot_time = line.replace("LastBootUpTime=", "").trim().to_string();
+                    return Ok(boot_time);
+                }
+            }
         }
+        Ok("unknown".to_string())
     }
 
     fn get_resolution() -> Result<String, RFetchError> {
@@ -434,7 +419,6 @@ impl SystemInfo {
                 .output()
             {
                 let _output_str = String::from_utf8_lossy(&output.stdout);
-                // Parse macOS display info - simplified
                 return Ok("unknown".to_string());
             }
         }
@@ -445,13 +429,10 @@ impl SystemInfo {
     fn get_cpu_info() -> Result<String, RFetchError> {
         #[cfg(target_os = "linux")]
         {
-            // Special handling for Termux
             if Self::is_termux() {
-                // Try getprop for Android device info
                 if let Ok(output) = Command::new("getprop").arg("ro.product.cpu.abi").output() {
                     let cpu_abi = String::from_utf8_lossy(&output.stdout).trim().to_string();
                     if !cpu_abi.is_empty() {
-                        // Try to get more detailed CPU info
                         if let Ok(model_output) = Command::new("getprop").arg("ro.product.model").output() {
                             let model = String::from_utf8_lossy(&model_output.stdout).trim().to_string();
                             if !model.is_empty() {
@@ -462,7 +443,6 @@ impl SystemInfo {
                     }
                 }
                 
-                // Fallback to lscpu if available
                 if let Ok(output) = Command::new("lscpu").output() {
                     let output_str = String::from_utf8_lossy(&output.stdout);
                     for line in output_str.lines() {
@@ -516,17 +496,13 @@ impl SystemInfo {
         Ok("unknown".to_string())
     }
 
-    // Helper function to detect if running in Termux
     fn is_termux() -> bool {
-        // Check for Termux-specific environment variables
         env::var("TERMUX_VERSION").is_ok() ||
         env::var("PREFIX").map(|p| p.contains("com.termux")).unwrap_or(false) ||
         std::path::Path::new("/data/data/com.termux").exists()
     }
 
-    // Helper function to detect if running on iOS
     fn is_ios() -> bool {
-        // Check for iOS-specific environment variables and paths
         env::var("IPHONEOS_DEPLOYMENT_TARGET").is_ok() ||
         std::path::Path::new("/proc/ish").exists() ||
         env::var("SIMULATOR_DEVICE_NAME").is_ok() ||
@@ -542,7 +518,6 @@ impl SystemInfo {
                     if line.trim().starts_with("Chipset Model:") {
                         if let Some(gpu) = line.split(':').nth(1) {
                             let gpu_name = gpu.trim().to_string();
-                            // Look for additional info like cores
                             for next_line in output_str.lines() {
                                 if next_line.trim().starts_with("Total Number of Cores:") {
                                     if let Some(cores) = next_line.split(':').nth(1) {
@@ -559,9 +534,7 @@ impl SystemInfo {
 
         #[cfg(target_os = "linux")]
         {
-            // Special handling for Termux
             if Self::is_termux() {
-                // Try to get GPU info from Android properties
                 if let Ok(output) = Command::new("getprop").arg("ro.hardware.vulkan").output() {
                     let vulkan = String::from_utf8_lossy(&output.stdout).trim().to_string();
                     if !vulkan.is_empty() && vulkan != "0" {
@@ -576,7 +549,6 @@ impl SystemInfo {
                     }
                 }
                 
-                // Try to get GPU renderer info
                 if let Ok(output) = Command::new("getprop").arg("debug.egl.hw").output() {
                     let hw = String::from_utf8_lossy(&output.stdout).trim().to_string();
                     if !hw.is_empty() && hw != "0" {
@@ -616,7 +588,6 @@ impl SystemInfo {
 
         #[cfg(target_os = "ios")]
         {
-            // For iOS, try to get GPU info from system_profiler if available (iSH environment)
             if let Ok(output) = Command::new("system_profiler").arg("SPDisplaysDataType").output() {
                 let output_str = String::from_utf8_lossy(&output.stdout);
                 for line in output_str.lines() {
@@ -628,7 +599,6 @@ impl SystemInfo {
                 }
             }
             
-            // Fallback: try to detect if we're on an Apple Silicon device
             if let Ok(output) = Command::new("uname").arg("-m").output() {
                 let arch = String::from_utf8_lossy(&output.stdout).trim().to_string();
                 if arch.contains("arm64") || arch.contains("aarch64") {
@@ -636,7 +606,6 @@ impl SystemInfo {
                 }
             }
             
-            // Final fallback for iOS
             return Ok("Integrated GPU".to_string());
         }
 
@@ -654,12 +623,12 @@ impl SystemInfo {
                     total = line.split_whitespace()
                         .nth(1)
                         .and_then(|s| s.parse().ok())
-                        .unwrap_or(0) * 1024; // Convert from KB to bytes
+                        .unwrap_or(0) * 1024;
                 } else if line.starts_with("MemAvailable:") {
                     available = line.split_whitespace()
                         .nth(1)
                         .and_then(|s| s.parse().ok())
-                        .unwrap_or(0) * 1024; // Convert from KB to bytes
+                        .unwrap_or(0) * 1024;
                 }
             }
 
@@ -686,7 +655,7 @@ impl SystemInfo {
         if let Ok(output) = Command::new("vm_stat").output() {
             let output_str = String::from_utf8_lossy(&output.stdout);
             
-            let mut page_size = 4096u64; // Default page size
+            let mut page_size = 4096u64;
             let mut pages_free = 0u64;
             let mut pages_active = 0u64;
             let mut pages_inactive = 0u64;
@@ -731,7 +700,6 @@ impl SystemInfo {
                 }
             }
             
-            // Calculate memory usage
             let total_pages = pages_free + pages_active + pages_inactive + pages_speculative + pages_wired + pages_compressed;
             let used_pages = pages_active + pages_inactive + pages_speculative + pages_wired + pages_compressed;
             let available_pages = pages_free + pages_inactive + pages_speculative;
@@ -759,7 +727,6 @@ impl SystemInfo {
 
     #[cfg(target_os = "windows")]
     fn get_memory_info() -> Result<MemoryInfo, RFetchError> {
-        // Simplified Windows memory info
         Ok(MemoryInfo {
             total: 0,
             used: 0,
@@ -770,11 +737,10 @@ impl SystemInfo {
 
     #[cfg(target_os = "ios")]
     fn get_memory_info() -> Result<MemoryInfo, RFetchError> {
-        // For iOS, try to use vm_stat if available (iSH environment)
         if let Ok(output) = Command::new("vm_stat").output() {
             let output_str = String::from_utf8_lossy(&output.stdout);
             
-            let mut page_size = 4096u64; // Default page size
+            let mut page_size = 4096u64;
             let mut pages_free = 0u64;
             let mut pages_active = 0u64;
             let mut pages_inactive = 0u64;
@@ -831,7 +797,6 @@ impl SystemInfo {
             });
         }
         
-        // Fallback for iOS
         Ok(MemoryInfo {
             total: 0,
             used: 0,
@@ -850,7 +815,6 @@ impl SystemInfo {
                 for line in output_str.lines().skip(1) {
                     let parts: Vec<&str> = line.split_whitespace().collect();
                     if parts.len() >= 9 && !parts[0].starts_with("map") && !parts[0].starts_with("devfs") {
-                        // Focus on main disk (usually /)
                         if parts[8] == "/" {
                             disks.push(DiskInfo {
                                 device: parts[0].to_string(),
@@ -861,7 +825,7 @@ impl SystemInfo {
                                 percentage: parts[4].trim_end_matches('%').parse().unwrap_or(0.0),
                                 filesystem: "APFS".to_string(),
                             });
-                            break; // Only show main disk
+                            break;
                         }
                     }
                 }
@@ -875,7 +839,6 @@ impl SystemInfo {
                 for line in output_str.lines().skip(1) {
                     let parts: Vec<&str> = line.split_whitespace().collect();
                     if parts.len() >= 7 && !parts[0].starts_with("tmpfs") && !parts[0].starts_with("devtmpfs") {
-                        // Focus on main disk (usually /)
                         if parts[1] == "/" {
                             disks.push(DiskInfo {
                                 device: parts[0].to_string(),
@@ -886,7 +849,7 @@ impl SystemInfo {
                                 percentage: parts[5].trim_end_matches('%').parse().unwrap_or(0.0),
                                 filesystem: parts.get(6).unwrap_or(&"unknown").to_string(),
                             });
-                            break; // Only show main disk
+                            break;
                         }
                     }
                 }
@@ -929,7 +892,7 @@ impl SystemInfo {
                                 percentage,
                                 filesystem: "NTFS".to_string(),
                             });
-                            break; // Only show C: drive
+                            break;
                         }
                     }
                 }
@@ -938,13 +901,11 @@ impl SystemInfo {
 
         #[cfg(target_os = "ios")]
         {
-            // For iOS, try to use df command if available (iSH environment)
             if let Ok(output) = Command::new("df").args(&["-h"]).output() {
                 let output_str = String::from_utf8_lossy(&output.stdout);
                 for line in output_str.lines().skip(1) {
                     let parts: Vec<&str> = line.split_whitespace().collect();
                     if parts.len() >= 9 && !parts[0].starts_with("devfs") && !parts[0].starts_with("map") {
-                        // Focus on main disk (usually /)
                         if parts[8] == "/" {
                             disks.push(DiskInfo {
                                 device: parts[0].to_string(),
@@ -955,12 +916,11 @@ impl SystemInfo {
                                 percentage: parts[4].trim_end_matches('%').parse().unwrap_or(0.0),
                                 filesystem: "APFS".to_string(),
                             });
-                            break; // Only show main disk
+                            break;
                         }
                     }
                 }
             } else {
-                // Fallback for iOS when df is not available
                 disks.push(DiskInfo {
                     device: "iOS Storage".to_string(),
                     mount_point: "/".to_string(),
@@ -976,7 +936,6 @@ impl SystemInfo {
         Ok(disks)
     }
 
-    // Helper function to parse size strings like "228Gi", "10Gi", etc.
     fn parse_size_string(size_str: &str) -> u64 {
         let size_str = size_str.trim();
         if size_str.is_empty() {
@@ -1033,19 +992,15 @@ impl SystemInfo {
         {
             if let Ok(output) = Command::new("pmset").args(&["-g", "batt"]).output() {
                 let output_str = String::from_utf8_lossy(&output.stdout);
-                // Parse macOS battery info
-                // Example output: "Now drawing from 'AC Power'\n -InternalBattery-0 (id=1234567)	100%; charged; 0:00 remaining present: true"
                 
                 let is_ac_power = output_str.contains("AC Power");
                 
                 for line in output_str.lines() {
                     if line.contains("InternalBattery") {
-                        // Look for percentage
                         if let Some(percent_start) = line.find('\t') {
                             let after_tab = &line[percent_start + 1..];
                             if let Some(percent_end) = after_tab.find('%') {
                                 if let Ok(percentage) = after_tab[..percent_end].trim().parse::<u8>() {
-                                    // Look for status - be more specific with the parsing
                                     let status = if after_tab.contains("charging") {
                                         "Charging"
                                     } else if after_tab.contains("discharging") {
@@ -1062,7 +1017,6 @@ impl SystemInfo {
                                         "Unknown"
                                     };
 
-                                    // Look for time remaining
                                     let time_remaining = if let Some(time_start) = after_tab.find(';') {
                                         let time_part = &after_tab[time_start + 1..];
                                         if let Some(remaining_pos) = time_part.find("remaining") {
@@ -1094,13 +1048,11 @@ impl SystemInfo {
 
         #[cfg(target_os = "ios")]
         {
-            // For iOS, try to use pmset if available (iSH environment)
             if let Ok(output) = Command::new("pmset").args(&["-g", "batt"]).output() {
                 let output_str = String::from_utf8_lossy(&output.stdout);
                 
                 for line in output_str.lines() {
                     if line.contains("InternalBattery") || line.contains("Battery") {
-                        // Look for percentage
                         if let Some(percent_start) = line.find('\t') {
                             let after_tab = &line[percent_start + 1..];
                             if let Some(percent_end) = after_tab.find('%') {
@@ -1127,7 +1079,6 @@ impl SystemInfo {
                 }
             }
             
-            // Fallback for iOS - assume device has battery
             return Ok(BatteryInfo {
                 percentage: 100,
                 status: "Unknown".to_string(),

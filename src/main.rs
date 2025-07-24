@@ -100,14 +100,12 @@ fn run() -> Result<(), RFetchError> {
         )
         .get_matches();
 
-    // Handle generate-template command
     if let Some(format) = matches.get_one::<String>("generate-template") {
         let template = TdlGenerator::generate_template(format);
         println!("{}", template);
         return Ok(());
     }
 
-    // Handle list-themes command
     if matches.get_flag("list-themes") {
         println!("Available themes:");
         for theme_name in list_themes() {
@@ -118,15 +116,12 @@ fn run() -> Result<(), RFetchError> {
         return Ok(());
     }
 
-    // Load configuration
     let config_path = matches.get_one::<String>("config");
     let mut config = Config::load(config_path)?;
 
-    // Apply theme if specified
     let mut loaded_theme: Option<themes::Theme> = None;
     if let Some(theme_name) = matches.get_one::<String>("theme") {
         let theme = if std::path::Path::new(theme_name).exists() {
-            // Load custom TDL theme from file
             match TdlParser::parse_file(theme_name) {
                 Ok(tdl_theme) => Some(TdlParser::to_theme(tdl_theme)),
                 Err(e) => {
@@ -136,12 +131,10 @@ fn run() -> Result<(), RFetchError> {
                 }
             }
         } else {
-            // Load built-in theme
             load_theme(theme_name)
         };
 
         if let Some(theme) = theme {
-            // Apply theme to config
             config.colors.title = theme.colors.title.clone();
             config.colors.subtitle = theme.colors.subtitle.clone();
             config.colors.key = theme.colors.key.clone();
@@ -153,7 +146,6 @@ fn run() -> Result<(), RFetchError> {
             config.display.separator = theme.display.separator.clone();
             config.display.padding = theme.display.padding;
             
-            // Store the theme for custom ASCII usage
             loaded_theme = Some(theme);
         } else if !std::path::Path::new(theme_name).exists() {
             eprintln!("{}: Unknown theme '{}'. Use --list-themes to see available themes.", 
@@ -161,7 +153,6 @@ fn run() -> Result<(), RFetchError> {
         }
     }
 
-    // Override config with command line arguments
     if let Some(logo) = matches.get_one::<String>("logo") {
         config.display.logo_type = logo.clone();
     }
@@ -184,15 +175,12 @@ fn run() -> Result<(), RFetchError> {
         config.apply_verbose();
     }
 
-    // Clear terminal if requested
     if matches.get_flag("clear") {
         clear_terminal();
     }
 
-    // Gather system information
     let system_info = SystemInfo::gather(&config)?;
 
-    // Display the information
     let display_manager = if let Some(ref theme) = loaded_theme {
         DisplayManager::with_theme(&config, theme)
     } else {
@@ -203,13 +191,10 @@ fn run() -> Result<(), RFetchError> {
     Ok(())
 }
 
-/// Clear terminal screen on all platforms (Windows, macOS, Linux, Termux)
 fn clear_terminal() {
-    // Try ANSI escape sequence first (works on most modern terminals)
     print!("\x1B[2J\x1B[1;1H");
     io::stdout().flush().unwrap_or(());
     
-    // Fallback to platform-specific commands if needed
     #[cfg(target_os = "windows")]
     {
         let _ = std::process::Command::new("cls").status();

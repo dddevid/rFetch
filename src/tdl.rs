@@ -2,9 +2,8 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
-use crate::themes::{Theme, AdvancedColor, ThemeColors, ThemeDisplay, CustomAscii, ThemeEffects, ColorEffect, Animation, AnimationType};
+use crate::themes::{Theme, AdvancedColor, ThemeColors, ThemeDisplay, ThemeEffects, ColorEffect, Animation, AnimationType};
 
-// Theme Definition Language (TDL) Parser
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TdlTheme {
     pub meta: TdlMeta,
@@ -126,11 +125,10 @@ pub struct TdlAscii {
     pub logo: Vec<String>,
     pub small_logo: Vec<String>,
     pub decorations: Option<HashMap<String, String>>,
-    pub frames: Option<Vec<Vec<String>>>, // For animated ASCII
+    pub frames: Option<Vec<Vec<String>>>,
     pub frame_delay: Option<f32>,
 }
 
-// TDL Parser implementation
 pub struct TdlParser;
 
 impl TdlParser {
@@ -140,15 +138,11 @@ impl TdlParser {
     }
 
     pub fn parse_string(content: &str) -> Result<TdlTheme, Box<dyn std::error::Error>> {
-        // Support multiple formats
         if content.trim_start().starts_with('{') {
-            // JSON format
             Ok(serde_json::from_str(content)?)
         } else if content.contains("name =") || content.contains("[meta]") {
-            // TOML format
             Ok(toml::from_str(content)?)
         } else {
-            // YAML format
             Ok(serde_yaml::from_str(content)?)
         }
     }
@@ -158,12 +152,10 @@ impl TdlParser {
             name: tdl.meta.name,
             description: tdl.meta.description,
             version: tdl.meta.version,
-            author: tdl.meta.author,
+            author: tdl.meta.author.unwrap_or_else(|| "Unknown".to_string()),
             colors: Self::convert_colors(tdl.colors),
             display: Self::convert_display(tdl.display),
-            info_order: tdl.layout.info_order,
-            custom_labels: tdl.layout.custom_labels.unwrap_or_default(),
-            custom_ascii: tdl.ascii.map(Self::convert_ascii),
+            ascii: tdl.ascii.map(|ascii| ascii.logo.join("\n")),
             effects: Self::convert_effects(tdl.effects),
         }
     }
@@ -176,20 +168,14 @@ impl TdlParser {
             value: Self::convert_color(colors.value),
             separator: Self::convert_color(colors.separator),
             logo: Self::convert_color(colors.logo),
-            accent: Self::convert_color(colors.accent),
+            accent: Some(Self::convert_color(colors.accent)),
             background: colors.background.map(Self::convert_color),
-            border: colors.border.map(Self::convert_color),
-            highlight: colors.highlight.map(Self::convert_color),
-            error: colors.error.map(Self::convert_color),
-            warning: colors.warning.map(Self::convert_color),
-            success: colors.success.map(Self::convert_color),
         }
     }
 
     fn convert_color(color: TdlColor) -> AdvancedColor {
         let mut advanced_color = AdvancedColor::new(&color.base);
 
-        // Set RGB from array or hex
         if let Some(rgb) = color.rgb {
             advanced_color.rgb = Some((rgb[0], rgb[1], rgb[2]));
         } else if let Some(hex) = color.hex {
@@ -198,7 +184,6 @@ impl TdlParser {
             }
         }
 
-        // Convert effects
         if let Some(effects) = color.effects {
             for effect_str in effects {
                 if let Some(effect) = Self::string_to_effect(&effect_str) {
@@ -207,20 +192,18 @@ impl TdlParser {
             }
         }
 
-        // Convert animation
         if let Some(anim) = color.animation {
             advanced_color.animation = Some(Animation {
                 animation_type: Self::string_to_animation_type(&anim.animation_type),
                 duration: anim.duration,
                 repeat: anim.repeat,
-                easing: anim.easing.unwrap_or_else(|| "ease-in-out".to_string()),
             });
         }
 
-        // Handle gradient
-        if let Some(gradient) = color.gradient {
-            advanced_color.effects.push(ColorEffect::Gradient(gradient.to_color));
-        }
+        // Note: Gradient support would need to be implemented differently
+        // if let Some(gradient) = color.gradient {
+        //     // Handle gradient conversion here if needed
+        // }
 
         advanced_color
     }
@@ -230,23 +213,8 @@ impl TdlParser {
             logo_type: display.logo_type,
             separator: display.separator,
             padding: display.padding,
-            show_borders: display.show_borders,
-            show_color_bar: display.show_color_bar,
-            color_bar_style: display.color_bar_style,
-            alignment: display.alignment,
-            max_width: display.max_width,
-            line_spacing: display.line_spacing,
-            indent: display.indent,
-            show_icons: display.show_icons,
-            icon_style: display.icon_style,
-        }
-    }
-
-    fn convert_ascii(ascii: TdlAscii) -> CustomAscii {
-        CustomAscii {
-            logo: ascii.logo,
-            small_logo: ascii.small_logo,
-            decorations: ascii.decorations.unwrap_or_default(),
+            layout: "horizontal".to_string(), // Default layout
+            border: None, // Default no border
         }
     }
 
@@ -254,20 +222,18 @@ impl TdlParser {
         if let Some(effects) = effects {
             ThemeEffects {
                 transitions: effects.transitions,
+                animations: true, // Default to true if effects are specified
+                glow: effects.glow_intensity > 0.0,
                 shadows: effects.shadows,
-                glow_intensity: effects.glow_intensity,
-                particle_effects: effects.particle_effects,
-                sound_effects: effects.sound_effects,
-                terminal_title: effects.terminal_title,
+                transparency: Some(0.95), // Default transparency
             }
         } else {
             ThemeEffects {
                 transitions: false,
+                animations: false,
+                glow: false,
                 shadows: false,
-                glow_intensity: 0.0,
-                particle_effects: false,
-                sound_effects: false,
-                terminal_title: None,
+                transparency: None,
             }
         }
     }
@@ -293,7 +259,7 @@ impl TdlParser {
             "strikethrough" => Some(ColorEffect::Strikethrough),
             "blink" => Some(ColorEffect::Blink),
             "reverse" => Some(ColorEffect::Reverse),
-            "glow" => Some(ColorEffect::Glow),
+            "glow" => Some(ColorEffect::Glow(50)),
             "shadow" => Some(ColorEffect::Shadow),
             _ => None,
         }
@@ -312,7 +278,6 @@ impl TdlParser {
     }
 }
 
-// Theme generator for creating TDL templates
 pub struct TdlGenerator;
 
 impl TdlGenerator {
@@ -486,14 +451,12 @@ impl TdlGenerator {
     }
 }
 
-// Theme validation
 pub struct TdlValidator;
 
 impl TdlValidator {
     pub fn validate(theme: &TdlTheme) -> Result<(), Vec<String>> {
         let mut errors = Vec::new();
 
-        // Validate meta
         if theme.meta.name.is_empty() {
             errors.push("Theme name cannot be empty".to_string());
         }
@@ -502,18 +465,16 @@ impl TdlValidator {
             errors.push("Theme description cannot be empty".to_string());
         }
 
-        // Validate version format
         if !Self::is_valid_version(&theme.meta.version) {
             errors.push("Invalid version format (use semantic versioning)".to_string());
         }
 
-        // Validate colors
+
         Self::validate_color(&theme.colors.title, "title", &mut errors);
         Self::validate_color(&theme.colors.subtitle, "subtitle", &mut errors);
         Self::validate_color(&theme.colors.key, "key", &mut errors);
         Self::validate_color(&theme.colors.value, "value", &mut errors);
 
-        // Validate display settings
         if theme.display.padding > 10 {
             errors.push("Padding should not exceed 10".to_string());
         }

@@ -1,129 +1,261 @@
 # rFetch
 
-Un tool di informazioni di sistema veloce e bello scritto in Rust - una versione migliorata di fastfetch.
+A fast and beautiful system information tool written in Rust - an improved version of fastfetch.
 
-## Caratteristiche
+## Features
 
-- 🚀 **Veloce**: Scritto in Rust per prestazioni ottimali
-- 🎨 **Bello**: Loghi ASCII colorati per molte distribuzioni
-- 🔧 **Configurabile**: File di configurazione TOML flessibile
-- 🌍 **Cross-platform**: Supporta Linux, macOS, Windows e Termux (Android)
-- 📊 **Informazioni complete**: CPU, GPU, memoria, disco, batteria e altro
-- 🎯 **Modalità multiple**: Normale, minimale, verbosa e JSON
-- 🌈 **Temi personalizzabili**: Sistema di temi integrato con colori e layout
-- 💾 **GPU e SSD migliorati**: Rilevamento avanzato di GPU e informazioni disco dettagliate
-- 📱 **Supporto Termux**: Ottimizzato per l'ambiente Android/Termux
+- 🚀 **Fast**: Written in Rust for optimal performance
+- 🎨 **Beautiful**: Colorful ASCII logos for many distributions
+- 🔧 **Configurable**: Flexible TOML configuration file
+- 🌍 **Cross-platform**: Supports Linux, macOS, Windows and iOS
+- 📊 **Complete information**: CPU, GPU, memory, disk, battery and more
+- 🎯 **Multiple modes**: Normal, minimal, verbose and JSON
+- 🌈 **Customizable themes**: Built-in theme system with colors and layouts
+- 💾 **Enhanced GPU and SSD**: Advanced GPU detection and detailed disk information
+- 📱 **iOS Support**: Full iOS support with automatic detection and iSH compatibility
 
-## Installazione
+## Installation
 
-### Da sorgente
+### Pre-built binaries
+
+Download the latest pre-built binaries from the [Releases](https://github.com/dddevid/rFetch/releases) page:
+
+- **macOS/Linux**: `rfetch-macos-linux`
+- **Windows**: `rfetch-windows.exe`
 
 ```bash
-git clone https://github.com/yourusername/rfetch.git
-cd rfetch
+# macOS/Linux
+chmod +x rfetch-macos-linux
+./rfetch-macos-linux
+
+# Windows
+rfetch-windows.exe
+```
+
+### From source
+
+```bash
+git clone https://github.com/dddevid/rFetch.git
+cd rFetch
 cargo build --release
 sudo cp target/release/rfetch /usr/local/bin/
 ```
 
-### Con Cargo
+### Cross-compilation for Windows
+
+To build a Windows executable from macOS/Linux:
+
+```bash
+# Install the Windows target
+rustup target add x86_64-pc-windows-gnu
+
+# Install MinGW linker (macOS with Homebrew)
+brew install mingw-w64
+
+# Create Cargo configuration for Windows linking
+mkdir -p .cargo
+echo '[target.x86_64-pc-windows-gnu]' > .cargo/config.toml
+echo 'linker = "x86_64-w64-mingw32-gcc"' >> .cargo/config.toml
+
+# Build for Windows
+cargo build --release --target x86_64-pc-windows-gnu
+
+# The Windows executable will be at:
+# target/x86_64-pc-windows-gnu/release/rfetch.exe
+```
+
+### With Cargo
 
 ```bash
 cargo install rfetch
 ```
 
-### Su Termux (Android)
+### On iOS (iSH)
 
 ```bash
-# Installa Rust e le dipendenze necessarie
-pkg update && pkg upgrade
-pkg install rust git
+# Install Rust and necessary dependencies
+apk update && apk upgrade
+apk add rust cargo git
 
-# Clona e compila
-git clone https://github.com/yourusername/rfetch.git
-cd rfetch
+# Clone and build
+git clone https://github.com/dddevid/rFetch.git
+cd rFetch
 cargo build --release
 
-# Copia l'eseguibile
-cp target/release/rfetch $PREFIX/bin/
+# Copy the executable
+cp target/release/rfetch /usr/local/bin/
 ```
 
-## Utilizzo
+## Running on Different Platforms
 
-### Utilizzo base
+### Arch Linux (and based distros)
+
+```bash
+# Install from AUR (if available)
+yay -S rfetch
+
+# Or build from source
+sudo pacman -S rust git
+git clone https://github.com/dddevid/rFetch.git
+cd rFetch
+cargo build --release
+sudo cp target/release/rfetch /usr/local/bin/
+
+# Run
+rfetch
+```
+
+### Ubuntu (and based distros)
+
+```bash
+# Install dependencies
+sudo apt update
+sudo apt install curl build-essential
+
+# Install Rust
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+source ~/.cargo/env
+
+# Build from source
+git clone https://github.com/dddevid/rFetch.git
+cd rFetch
+cargo build --release
+sudo cp target/release/rfetch /usr/local/bin/
+
+# Run
+rfetch
+```
+
+### macOS
+
+```bash
+# Install Rust via Homebrew (recommended)
+brew install rust
+
+# Or install Rust directly
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+# Build from source
+git clone https://github.com/dddevid/rFetch.git
+cd rFetch
+cargo build --release
+sudo cp target/release/rfetch /usr/local/bin/
+
+# Run
+rfetch
+```
+
+### Windows
+
+```bash
+# Download the pre-built executable from releases
+# Or build from source with Rust installed
+
+# Using PowerShell/Command Prompt
+.\rfetch.exe
+
+# Or add to PATH and run
+rfetch
+```
+
+### Termux (Android)
+
+```bash
+# Update packages
+pkg update && pkg upgrade
+
+# Install dependencies
+pkg install rust git
+
+# Clone and build
+git clone https://github.com/dddevid/rFetch.git
+cd rFetch
+cargo build --release
+
+# Copy to bin directory
+cp target/release/rfetch $PREFIX/bin/
+
+# Run
+rfetch
+```
+
+## Usage
+
+### Basic usage
 
 ```bash
 rfetch
 ```
 
-### Opzioni disponibili
+### Available options
 
 ```bash
 rfetch --help
 ```
 
-- `-c, --config <FILE>`: Usa un file di configurazione personalizzato
-- `-l, --logo <LOGO>`: Tipo di logo (auto, ascii, small, none)
-- `--color <WHEN>`: Quando usare i colori (auto, always, never)
-- `-j, --json`: Output in formato JSON
-- `-m, --minimal`: Mostra informazioni minimali
-- `-v, --verbose`: Mostra informazioni verbose
-- `--theme <THEME>`: Usa un tema specifico
-- `--list-themes`: Elenca tutti i temi disponibili
+- `-c, --config <FILE>`: Use a custom configuration file
+- `-l, --logo <LOGO>`: Logo type (auto, ascii, small, none)
+- `--color <WHEN>`: When to use colors (auto, always, never)
+- `-j, --json`: Output in JSON format
+- `-m, --minimal`: Show minimal information
+- `-v, --verbose`: Show verbose information
+- `--theme <THEME>`: Use a specific theme
+- `--list-themes`: List all available themes
 
-### Esempi
+### Examples
 
 ```bash
-# Output minimale
+# Minimal output
 rfetch --minimal
 
-# Output JSON
+# JSON output
 rfetch --json
 
-# Logo specifico
+# Specific logo
 rfetch --logo small
 
-# Senza colori
+# No colors
 rfetch --color never
 
-# Usa il tema neon
+# Use neon theme
 rfetch --theme neon
 
-# Elenca tutti i temi
+# List all themes
 rfetch --list-themes
 
-# Configurazione personalizzata
+# Custom configuration
 rfetch --config ~/.config/rfetch/custom.toml
 ```
 
-## Temi
+## Themes
 
-rFetch include un sistema di temi integrato con diversi temi predefiniti:
+rFetch includes a built-in theme system with several predefined themes:
 
-- **default**: Tema predefinito con colori bilanciati
-- **minimal**: Tema pulito e minimale con informazioni essenziali
-- **neon**: Colori vivaci e brillanti per un look moderno
-- **retro**: Stile vintage con colori verdi
+- **default**: Default theme with balanced colors
+- **minimal**: Clean and minimal theme with essential information
+- **neon**: Bright and vivid colors for a modern look
+- **retro**: Vintage style with green colors
 
-### Utilizzo dei temi
+### Using themes
 
 ```bash
-# Elenca tutti i temi disponibili
+# List all available themes
 rfetch --list-themes
 
-# Usa un tema specifico
+# Use a specific theme
 rfetch --theme neon
 rfetch --theme minimal
 rfetch --theme retro
 ```
 
-## Configurazione
+## Configuration
 
-rFetch usa un file di configurazione TOML. Il file predefinito si trova in:
+rFetch uses a TOML configuration file. The default file is located at:
 
 - Linux/macOS: `~/.config/rfetch/config.toml`
 - Windows: `%APPDATA%\rfetch\config.toml`
 
-### Esempio di configurazione
+### Configuration example
 
 ```toml
 [display]
@@ -169,27 +301,27 @@ separator = "white"
 logo = "cyan"
 ```
 
-## Informazioni supportate
+## Supported information
 
-- **Sistema**: OS, kernel, uptime
-- **Hardware**: CPU, GPU (con core count), memoria, disco (con spazio usato/totale), batteria
-- **Software**: Shell, terminal, DE, WM, pacchetti
-- **Rete**: IP locale, IP pubblico
-- **Altro**: Risoluzione, tema, font, utenti, data
+- **System**: OS, kernel, uptime
+- **Hardware**: CPU, GPU (with core count), memory, disk (with used/total space), battery
+- **Software**: Shell, terminal, DE, WM, packages
+- **Network**: Local IP, public IP
+- **Other**: Resolution, theme, font, users, date
 
-### Miglioramenti GPU
+### GPU improvements
 
-- **macOS**: Rilevamento Apple Silicon (M1, M2, etc.) con conteggio core
-- **Linux**: Supporto migliorato per GPU discrete e integrate
-- **Windows**: Rilevamento GPU tramite WMI
+- **macOS**: Apple Silicon detection (M1, M2, etc.) with core count
+- **Linux**: Enhanced support for discrete and integrated GPUs
+- **Windows**: GPU detection via WMI
 
-### Miglioramenti Disco
+### Disk improvements
 
-- **Formato migliorato**: Mostra "Usato / Totale (Percentuale%)"
-- **Parsing accurato**: Gestione corretta delle unità (GB, TB, etc.)
-- **Multi-platform**: Supporto ottimizzato per Linux, macOS e Windows
+- **Enhanced format**: Shows "Used / Total (Percentage%)"
+- **Accurate parsing**: Correct handling of units (GB, TB, etc.)
+- **Multi-platform**: Optimized support for Linux, macOS and Windows
 
-## Sistemi operativi supportati
+## Supported operating systems
 
 ### Linux
 - Arch Linux
@@ -201,28 +333,29 @@ logo = "cyan"
 - openSUSE
 - CentOS
 - Alpine
-- E molti altri
+- And many others
 
-### Termux (Android)
-- Supporto completo per Termux su Android
-- Rilevamento automatico dell'ambiente Termux
-- Gestione pacchetti con `pkg`
-- Informazioni CPU e GPU specifiche per Android
-- Logo dedicato per Termux
+### iOS
+- Complete iOS support with automatic detection
+- Automatic Termux environment detection
+- Package management with `pkg`
+- iOS-specific CPU and GPU information
+- Dedicated iOS logo
+- Full iSH shell compatibility
 
 ### macOS
-- Supporto completo per macOS/Darwin
-- Rilevamento Apple Silicon ottimizzato
-- Informazioni disco accurate
+- Complete macOS/Darwin support
+- Optimized Apple Silicon detection
+- Accurate disk information
 
 ### Windows
-- Supporto base per Windows
-- Rilevamento GPU tramite WMI
-- Informazioni disco tramite WMI
+- Basic Windows support
+- GPU detection via WMI
+- Disk information via WMI
 
-## Sviluppo
+## Development
 
-### Prerequisiti
+### Prerequisites
 
 - Rust 1.70+
 - Cargo
@@ -245,36 +378,48 @@ cargo test
 cargo build --release
 ```
 
-## Contribuire
+## Contributing
 
-I contributi sono benvenuti! Per favore:
+Contributions are welcome! Please:
 
-1. Fai un fork del progetto
-2. Crea un branch per la tua feature (`git checkout -b feature/AmazingFeature`)
-3. Committa le tue modifiche (`git commit -m 'Add some AmazingFeature'`)
-4. Pusha al branch (`git push origin feature/AmazingFeature`)
-5. Apri una Pull Request
+1. Fork the project
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-## Licenza
+## Theme Creator
 
-Questo progetto è sotto licenza MIT. Vedi il file `LICENSE` per i dettagli.
+Create custom themes with our interactive Theme Creator:
+**[rFetch Theme Creator](https://dddevid.github.io/rFetch-theme-creator/)**
 
-## Ringraziamenti
+Features:
+- Real-time terminal preview
+- Dark/light mode with auto-detection
+- Live color and effect updates
+- Export to YAML/TOML formats
+- Modern responsive UI
 
-- Ispirato da [fastfetch](https://github.com/fastfetch-cli/fastfetch)
-- Loghi ASCII da varie fonti della community
-- Community Rust per le eccellenti librerie
+## License
+
+This project is licensed under the MIT License. See the `LICENSE` file for details.
+
+## Acknowledgments
+
+- Inspired by [fastfetch](https://github.com/fastfetch-cli/fastfetch)
+- ASCII logos from various community sources
+- Rust community for excellent libraries
 
 ## Roadmap
 
-- [ ] Supporto per più package manager
-- [ ] Temi personalizzati definiti dall'utente
-- [ ] Plugin system per informazioni aggiuntive
-- [ ] Configurazione GUI
-- [ ] Supporto per più formati di output
+- [ ] Support for more package managers
+- [ ] User-defined custom themes
+- [ ] Plugin system for additional information
+- [ ] GUI configuration
+- [ ] Support for more output formats
 - [ ] Plugin system
-- [ ] Temi predefiniti
-- [ ] Supporto per immagini nei terminali
-- [ ] Benchmark e ottimizzazioni
-- [ ] Supporto per container
-- [ ] API per integrazione con altri tool
+- [ ] Predefined themes
+- [ ] Support for images in terminals
+- [ ] Benchmarks and optimizations
+- [ ] Container support
+- [ ] API for integration with other tools

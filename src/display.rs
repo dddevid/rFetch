@@ -44,7 +44,6 @@ impl<'a> DisplayManager<'a> {
         let max_logo_width = self.calculate_max_visual_width(&logo_lines);
         let max_lines = cmp::max(logo_lines.len(), info_lines.len());
 
-        // Display header
         if !self.config.display.minimal {
             let title = format!("{}@{}", info.user, info.hostname);
             let separator = "─".repeat(title.len());
@@ -59,7 +58,6 @@ impl<'a> DisplayManager<'a> {
             println!();
         }
 
-        // Display logo and info side by side
         for i in 0..max_lines {
             let empty_string = String::new();
             let logo_line = logo_lines.get(i).unwrap_or(&empty_string);
@@ -73,18 +71,16 @@ impl<'a> DisplayManager<'a> {
             };
 
             if self.should_use_colors() {
-                print!("{}", logo_line.color(self.config.colors.logo.as_str()));
+                print!("{}", logo_line.color(self.config.colors.logo.base.as_str()));
             } else {
                 print!("{}", logo_line);
             }
 
-            // Add padding to align with the longest line
             print!("{}", " ".repeat(padding_needed));
             print!("{}", " ".repeat(self.config.display.padding));
             println!("{}", info_line);
         }
 
-        // Display color bar if not minimal
         if !self.config.display.minimal {
             println!();
             self.display_color_bar(&info.colors, max_logo_width)?;
@@ -101,22 +97,17 @@ impl<'a> DisplayManager<'a> {
     }
 
     fn calculate_visual_width(&self, line: &str) -> usize {
-        // Remove ANSI escape sequences and calculate visual width
         let cleaned = self.strip_ansi_codes(line);
         
-        // Count visual width considering Unicode characters
         cleaned.chars().map(|c| {
             match c {
-                // Most Unicode box drawing and block characters are double-width in some terminals
-                // but single-width in others. We'll treat them as single-width for consistency.
-                '\u{2500}'..='\u{257F}' => 1, // Box Drawing
-                '\u{2580}'..='\u{259F}' => 1, // Block Elements
-                '\u{25A0}'..='\u{25FF}' => 1, // Geometric Shapes
-                '\u{2600}'..='\u{26FF}' => 2, // Miscellaneous Symbols (often emoji-like)
-                '\u{2700}'..='\u{27BF}' => 1, // Dingbats
-                '\u{1F300}'..='\u{1F9FF}' => 2, // Emoji
+                '\u{2500}'..='\u{257F}' => 1,
+                '\u{2580}'..='\u{259F}' => 1,
+                '\u{25A0}'..='\u{25FF}' => 1,
+                '\u{2600}'..='\u{26FF}' => 2,
+                '\u{2700}'..='\u{27BF}' => 1,
+                '\u{1F300}'..='\u{1F9FF}' => 2,
                 _ => {
-                    // For other characters, use Unicode width
                     UnicodeWidthChar::width(c).unwrap_or(1)
                 }
             }
@@ -124,16 +115,13 @@ impl<'a> DisplayManager<'a> {
     }
 
     fn strip_ansi_codes(&self, text: &str) -> String {
-        // Simple ANSI escape sequence removal
         let mut result = String::new();
         let mut chars = text.chars().peekable();
         
         while let Some(ch) = chars.next() {
             if ch == '\x1b' {
-                // Skip escape sequence
                 if chars.peek() == Some(&'[') {
-                    chars.next(); // consume '['
-                    // Skip until we find a letter (end of escape sequence)
+                    chars.next();
                     while let Some(next_ch) = chars.next() {
                         if next_ch.is_ascii_alphabetic() {
                             break;
@@ -149,19 +137,11 @@ impl<'a> DisplayManager<'a> {
     }
 
     fn get_logo_lines(&self, os_name: &str) -> Vec<String> {
-        // Check if theme has custom ASCII art
         if let Some(theme) = self.theme {
-            if let Some(custom_ascii) = &theme.custom_ascii {
+            if let Some(ascii) = &theme.ascii {
                 match self.config.display.logo_type.as_str() {
-                    "small" => {
-                        if !custom_ascii.small_logo.is_empty() {
-                            return custom_ascii.small_logo.clone();
-                        }
-                    }
                     "ascii" | "auto" => {
-                        if !custom_ascii.logo.is_empty() {
-                            return custom_ascii.logo.clone();
-                        }
+                        return ascii.lines().map(|s| s.to_string()).collect();
                     }
                     "none" => return vec![],
                     _ => {}
@@ -169,7 +149,6 @@ impl<'a> DisplayManager<'a> {
             }
         }
         
-        // Fallback to default logo system
         get_logo(os_name, &self.config.display.logo_type)
     }
 
@@ -278,9 +257,9 @@ impl<'a> DisplayManager<'a> {
         if self.should_use_colors() {
             format!(
                 "{}{}{}",
-                key.color(self.config.colors.key.as_str()).bold(),
-                separator.color(self.config.colors.separator.as_str()),
-                value.color(self.config.colors.value.as_str())
+                key.color(self.config.colors.key.base.as_str()).bold(),
+                separator.color(self.config.colors.separator.base.as_str()),
+                value.color(self.config.colors.value.base.as_str())
             )
         } else {
             format!("{}{}{}", key, separator, value)
@@ -307,7 +286,6 @@ impl<'a> DisplayManager<'a> {
         }
         println!();
 
-        // Bright colors
         print!("{}", padding);
         for (i, color_name) in color_names.iter().enumerate() {
             if i < colors.len() {
@@ -330,7 +308,6 @@ impl<'a> DisplayManager<'a> {
     }
 }
 
-// Extension trait for colored strings
 trait ColorExt {
     fn color(&self, color_name: &str) -> ColoredString;
 }

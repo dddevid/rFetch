@@ -136,7 +136,6 @@ impl Config {
         let content = toml::to_string_pretty(self)
             .map_err(|e| RFetchError::config(format!("Failed to serialize config: {}", e)))?;
 
-        // Create config directory if it doesn't exist
         if let Some(parent) = Path::new(&config_file).parent() {
             fs::create_dir_all(parent)?;
         }

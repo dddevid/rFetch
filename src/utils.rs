@@ -66,78 +66,162 @@ pub fn get_shell() -> String {
 }
 
 pub fn get_terminal() -> String {
-    // Check if running in Termux first
-    if env::var("TERMUX_VERSION").is_ok() || 
-       env::var("PREFIX").map(|p| p.contains("com.termux")).unwrap_or(false) {
+    if let Ok(term) = env::var("TERM_PROGRAM") {
+        return term;
+    }
+
+    if is_termux() {
         return "Termux".to_string();
     }
 
-    // Try various environment variables that might contain terminal info
-    let terminal_vars = [
-        "TERM_PROGRAM",
-        "TERMINAL_EMULATOR", 
-        "TERM",
-        "COLORTERM",
-    ];
-
-    for var in &terminal_vars {
-        if let Ok(value) = env::var(var) {
-            if !value.is_empty() && value != "xterm-256color" && value != "screen" {
-                return value;
-            }
+    if let Ok(term) = env::var("TERM") {
+        if !term.is_empty() && term != "xterm" && term != "xterm-256color" {
+            return term;
         }
     }
 
-    // Try to detect from parent process
+    if let Ok(term) = env::var("TERMINAL") {
+        return term;
+    }
+
+    if let Ok(term) = env::var("COLORTERM") {
+        return term;
+    }
+
+    if let Ok(term) = env::var("TERM_PROGRAM_VERSION") {
+        return format!("Terminal {}", term);
+    }
+
     if let Ok(output) = Command::new("ps")
-        .args(&["-p", &env::var("PPID").unwrap_or_default(), "-o", "comm="])
+        .args(&["-o", "comm=", "-p"])
+        .arg(format!("{}", std::process::id()))
         .output()
     {
-        let parent = String::from_utf8_lossy(&output.stdout).trim().to_string();
-        if !parent.is_empty() {
-            return parent;
+        if let Ok(parent) = String::from_utf8(output.stdout) {
+            let parent = parent.trim();
+            if !parent.is_empty() {
+                return parent.to_string();
+            }
         }
     }
 
     "unknown".to_string()
 }
 
-pub fn count_packages() -> u64 {
-    let mut count = 0;
+pub fn is_termux() -> bool {
+    env::var("PREFIX").map(|p| p.contains("com.termux")).unwrap_or(false)
+}
 
-    // Try different package managers
+pub fn count_packages() -> u64 {
+    let mut total = 0;
+
     let package_managers = [
         ("pacman", &["-Q"] as &[&str]),
         ("dpkg", &["-l"]),
         ("rpm", &["-qa"]),
-        ("emerge", &["--list-installed"]),
-        ("pkg", &["list-installed"]), // Termux pkg manager
-        ("pkg", &["info"]), // FreeBSD pkg manager (fallback)
+        ("pkg", &["list-installed"]),
         ("brew", &["list"]),
-        ("port", &["installed"]),
-        ("nix-env", &["-q"]),
         ("flatpak", &["list"]),
         ("snap", &["list"]),
+        ("apk", &["list", "-I"]),
+        ("emerge", &["--list"]),
+        ("zypper", &["search", "-i"]),
+        ("yum", &["list", "installed"]),
+        ("dnf", &["list", "installed"]),
+        ("pkg_info", &[""]),
+        ("pkgin", &["list"]),
+        ("xbps-query", &["-l"]),
+        ("nix-env", &["-q"]),
+        ("guix", &["package", "--list-installed"]),
     ];
 
     for (manager, args) in &package_managers {
         if let Ok(output) = Command::new(manager).args(*args).output() {
             if output.status.success() {
-                let lines = String::from_utf8_lossy(&output.stdout)
+                let count = String::from_utf8_lossy(&output.stdout)
                     .lines()
                     .filter(|line| !line.trim().is_empty())
-                    .count();
-                count += lines as u64;
+                    .count() as u64;
                 
-                // For Termux pkg, we found packages, so break to avoid double counting
-                if *manager == "pkg" && *args == &["list-installed"] && lines > 0 {
+                total += count;
+                
+                if manager == &"pkg" && count > 0 {
                     break;
                 }
             }
         }
     }
 
-    count
+    total
+}
+
+pub fn is_container() -> bool {
+    if std::path::Path::new("/.dockerenv").exists() {
+        return true;
+    }
+
+    if let Ok(content) = std::fs::read_to_string("/proc/1/cgroup") {
+        if content.contains("docker") || content.contains("lxc") || content.contains("containerd") {
+            return true;
+        }
+    }
+
+    false
+}
+
+pub fn get_desktop_environment() -> String {
+    let de_vars = [
+        "XDG_CURRENT_DESKTOP",
+        "DESKTOP_SESSION", 
+        "GDMSESSION",
+        "KDE_SESSION_VERSION",
+        "GNOME_DESKTOP_SESSION_ID",
+    ];
+
+    for var in &de_vars {
+        if let Ok(value) = env::var(var) {
+            if !value.is_empty() {
+                return value.to_lowercase();
+            }
+        }
+    }
+
+    let de_processes = [
+        "gnome-session",
+        "kde-session", 
+        "xfce4-session",
+        "lxsession",
+        "mate-session",
+        "cinnamon-session",
+    ];
+
+    for process in &de_processes {
+        if Command::new("pgrep").arg(process).output().map(|o| o.status.success()).unwrap_or(false) {
+            return process.replace("-session", "").to_string();
+        }
+    }
+
+    "unknown".to_string()
+}
+
+pub fn get_window_manager() -> String {
+    let wm_processes = [
+        "i3", "sway", "bspwm", "dwm", "awesome", "xmonad", 
+        "openbox", "fluxbox", "blackbox", "fvwm", "jwm",
+        "herbstluftwm", "qtile", "spectrwm", "cwm", "2bwm",
+    ];
+
+    for wm in &wm_processes {
+        if Command::new("pgrep").arg(wm).output().map(|o| o.status.success()).unwrap_or(false) {
+            return wm.to_string();
+        }
+    }
+
+    if let Ok(wm) = env::var("WINDOW_MANAGER") {
+        return wm;
+    }
+
+    "unknown".to_string()
 }
 
 #[cfg(unix)]
@@ -181,69 +265,9 @@ pub fn center_text(text: &str, width: usize) -> String {
 }
 
 pub fn is_running_in_container() -> bool {
-    // Check for common container indicators
     Path::new("/.dockerenv").exists() ||
     env::var("container").is_ok() ||
     fs::read_to_string("/proc/1/cgroup")
         .map(|content| content.contains("docker") || content.contains("lxc"))
         .unwrap_or(false)
-}
-
-pub fn get_desktop_environment() -> String {
-    // Check various DE environment variables
-    let de_vars = [
-        "XDG_CURRENT_DESKTOP",
-        "DESKTOP_SESSION", 
-        "GDMSESSION",
-        "KDE_SESSION_VERSION",
-        "GNOME_DESKTOP_SESSION_ID",
-    ];
-
-    for var in &de_vars {
-        if let Ok(value) = env::var(var) {
-            if !value.is_empty() {
-                return value.to_lowercase();
-            }
-        }
-    }
-
-    // Try to detect from running processes
-    let de_processes = [
-        "gnome-session",
-        "kde-session", 
-        "xfce4-session",
-        "lxsession",
-        "mate-session",
-        "cinnamon-session",
-    ];
-
-    for process in &de_processes {
-        if Command::new("pgrep").arg(process).output().map(|o| o.status.success()).unwrap_or(false) {
-            return process.replace("-session", "").to_string();
-        }
-    }
-
-    "unknown".to_string()
-}
-
-pub fn get_window_manager() -> String {
-    // Common window managers to check for
-    let wm_processes = [
-        "i3", "sway", "bspwm", "dwm", "awesome", "xmonad", 
-        "openbox", "fluxbox", "blackbox", "fvwm", "jwm",
-        "herbstluftwm", "qtile", "spectrwm", "cwm", "2bwm",
-    ];
-
-    for wm in &wm_processes {
-        if Command::new("pgrep").arg(wm).output().map(|o| o.status.success()).unwrap_or(false) {
-            return wm.to_string();
-        }
-    }
-
-    // Check environment variables
-    if let Ok(wm) = env::var("WINDOW_MANAGER") {
-        return wm;
-    }
-
-    "unknown".to_string()
 }

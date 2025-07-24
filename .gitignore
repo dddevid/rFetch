@@ -53,3 +53,6 @@ config.toml
 # Local environment
 .env
 .env.local
+
+# Theme Creator (moved to separate repository)
+theme-creator/
